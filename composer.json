@@ -1,5 +1,5 @@
 {
-	"name": "arno.schoon/extbase_rest",
+	"name": "arnoschoon/extbase_rest",
 	"type": "typo3cms-extension",
 	"require": {
 		"lw/typo3cms-installers": "*"
