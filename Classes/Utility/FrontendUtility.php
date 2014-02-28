@@ -36,7 +36,14 @@ class Tx_ExtbaseRest_Utility_FrontendUtility {
 	public static function startSimulation() {
 		self::$tsfeBackup = $GLOBALS['TSFE'];
 
-		$GLOBALS['TSFE'] = t3lib_div::makeInstance('tslib_fe', $GLOBALS['TYPO3_CONF_VARS'], 0, 0);
+		$pageId = (int) $_SERVER['HTTP_X_TYPO3_ID'];
+		$languageId = (int) $_SERVER['HTTP_X_TYPO3_L'];
+
+		if ($languageId > 0) {
+			t3lib_div::_GETset($languageId, 'L');
+		}
+
+		$GLOBALS['TSFE'] = t3lib_div::makeInstance('tslib_fe', $GLOBALS['TYPO3_CONF_VARS'], $pageId, 0);
 		$GLOBALS['TSFE']->initFEuser();
 		$GLOBALS['TSFE']->determineId();
 		$GLOBALS['TSFE']->includeTCA();
