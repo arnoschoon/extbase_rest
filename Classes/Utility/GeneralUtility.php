@@ -1,4 +1,6 @@
 <?php
+namespace ArnoSchoon\ExtbaseRest\Utility;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -23,7 +25,12 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-class Tx_ExtbaseRest_Utility_GeneralUtility {
+/**
+ * Class GeneralUtility
+ *
+ * @package ArnoSchoon\ExtbaseRest\Utility
+ */
+class GeneralUtility {
 
 	/**
 	 * @param string

@@ -1,4 +1,6 @@
 <?php
+namespace ArnoSchoon\ExtbaseRest\Mvc\Web;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -22,11 +24,20 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+use ArnoSchoon\ExtbaseRest\Router;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBuilder {
+/**
+ * Class RequestBuilder
+ *
+ * @package ArnoSchoon\ExtbaseRest\Mvc\Web
+ */
+class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 
 	/**
-	 * @var Tx_Extbase_Reflection_Service
+	 * @var \TYPO3\CMS\Extbase\Reflection\ReflectionService
+	 * @inject
 	 */
 	protected $reflectionService;
 
@@ -36,43 +47,34 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 	protected static $reservedArgumentNames = array('controller', 'format');
 
 	/**
-	 * Inject an instance of the reflection service
-	 *
-	 * @param Tx_Extbase_Reflection_Service $reflectionService
-	 *
-	 * @return void
-	 */
-	public function injectReflectionService(Tx_Extbase_Reflection_Service $reflectionService) {
-		$this->reflectionService = $reflectionService;
-	}
-
-	/**
 	 * Builds a web request object from the raw HTTP information and the configuration
 	 *
-	 * @return Tx_Extbase_MVC_Web_Request The web request as an object
+	 * @return \TYPO3\CMS\Extbase\MVC\Web\Request The web request as an object
 	 *
-	 * @throws Tx_Extbase_MVC_Exception
+	 * @throws \TYPO3\CMS\Extbase\Mvc\Exception
 	 */
 	public function build() {
 		$this->loadDefaultValues();
 		$parameters = $this->buildParametersFromRequest();
 
-		/** @var Tx_Extbase_MVC_Web_Request $request */
-		$request = $this->objectManager->create('Tx_Extbase_MVC_Web_Request');
+		/** @var \TYPO3\CMS\Extbase\MVC\Web\Request $request */
+		$request = $this->objectManager->get('TYPO3\\CMS\\Extbase\\MVC\\Web\\Request');
 		$request->setPluginName($this->pluginName);
 		$request->setControllerExtensionName($this->extensionName);
-		if (EXTBASE_REST_V6 && $this->vendorName) {
+
+		if ($this->vendorName) {
 			$request->setControllerVendorName($this->vendorName);
 		}
-		$request->setRequestURI(t3lib_div::getIndpEnv('TYPO3_REQUEST_URL'));
-		$request->setBaseURI(t3lib_div::getIndpEnv('TYPO3_SITE_URL'));
+
+		$request->setRequestURI(GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL'));
+		$request->setBaseURI(GeneralUtility::getIndpEnv('TYPO3_SITE_URL'));
 		$request->setMethod(isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD']) ?
 				$_SERVER['REQUEST_METHOD'] : 'GET');
 
 		if (is_string($parameters['controller']) && array_key_exists($parameters['controller'], $this->allowedControllerActions)) {
 			$controllerName = filter_var($parameters['controller'], FILTER_SANITIZE_STRING);
 		} else {
-			throw new Tx_Extbase_MVC_Exception(
+			throw new \TYPO3\CMS\Extbase\Mvc\Exception(
 				'You either failed to specify the controller in your request or this plugin is not allowed to execute it.
 				Please check for Tx_Extbase_Utility_Extension::configurePlugin() in your ext_localconf.php.',
 				1391083601
@@ -88,7 +90,7 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 		$actionName = $this->resolveActionNameByRequestMethod($request);
 
 		if ($actionName === NULL) {
-			throw new Tx_Extbase_MVC_Exception(
+			throw new \TYPO3\CMS\Extbase\Mvc\Exception(
 				'The used HTTP request method (' . $request->getMethod() . ') is not allowed for any of the allowed actions.
 				Please check the @restMethod annotations in ' . $request->getControllerObjectName(),
 				1295479651
@@ -108,19 +110,14 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 	 */
 	protected function buildParametersFromRequest() {
 		$rawRequestBody = file_get_contents('php://input');
-		$requestUri = t3lib_div::getIndpEnv('REQUEST_URI');
+		$requestUri = GeneralUtility::getIndpEnv('REQUEST_URI');
 		$match = NULL;
 
-		if (!EXTBASE_REST_V6) {
-			$pluginNamespace = Tx_Extbase_Utility_Extension::getPluginNamespace($this->extensionName, $this->pluginName);
-		} else {
-			$pluginNamespace = $this->extensionService->getPluginNamespace($this->extensionName, $this->pluginName);
-		}
+		$pluginNamespace = $this->extensionService->getPluginNamespace($this->extensionName, $this->pluginName);
+		$parameters = GeneralUtility::_GPmerged($pluginNamespace);
 
-		$parameters = t3lib_div::_GPmerged($pluginNamespace);
-
-		if (preg_match(Tx_ExtbaseRest_Router::CONTROLLER_FORMAT_PATTERN, $requestUri, $match) === 1) {
-			$parameters['controller'] = Tx_ExtbaseRest_Utility_GeneralUtility::conditionalUpperCamelCase($match[1]);
+		if (preg_match(Router::CONTROLLER_FORMAT_PATTERN, $requestUri, $match) === 1) {
+			$parameters['controller'] = \ArnoSchoon\ExtbaseRest\Utility\GeneralUtility::conditionalUpperCamelCase($match[1]);
 			$parameters['format'] = $match[2];
 		}
 
@@ -128,7 +125,7 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 			$arguments = json_decode($rawRequestBody, TRUE);
 
 			if ($arguments !== NULL) {
-				$parameters = t3lib_div::array_merge_recursive_overrule($parameters, $arguments);
+				ArrayUtility::mergeRecursiveWithOverrule($parameters, $arguments);
 			}
 		}
 
@@ -136,11 +133,11 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 	}
 
 	/**
-	 * @param Tx_Extbase_MVC_Web_Request $request
+	 * @param \TYPO3\CMS\Extbase\MVC\Web\Request $request
 	 *
 	 * @return string|null
 	 */
-	protected function resolveActionNameByRequestMethod(Tx_Extbase_MVC_Web_Request $request) {
+	protected function resolveActionNameByRequestMethod(\TYPO3\CMS\Extbase\MVC\Web\Request $request) {
 		$allowedActions = $this->allowedControllerActions[$request->getControllerName()];
 		$requestMethod = $request->getMethod();
 		$possibleActionNames = array();
@@ -187,7 +184,7 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 					return 0;
 				}
 
-				return ($paramCountA > $paramCountB) ? -1 : 1;
+				return ($paramCountA > $paramCountB) ? - 1 : 1;
 			});
 
 			foreach ($possibleActionNames as $possibleActionName => $possibleActionMethodTags) {
@@ -202,11 +199,11 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 
 	/**
 	 * @var array $actionMethodTags
-	 * @param Tx_Extbase_MVC_Web_Request $request
+	 * @param \TYPO3\CMS\Extbase\MVC\Web\Request $request
 	 *
 	 * @return bool
 	 */
-	protected function canActionSatisfyRequest(array $actionMethodTags, Tx_Extbase_MVC_Web_Request $request) {
+	protected function canActionSatisfyRequest(array $actionMethodTags, \TYPO3\CMS\Extbase\MVC\Web\Request $request) {
 		$requestArgumentNames = array_keys($request->getArguments());
 		$canActionSatisfyRequest = TRUE;
 
@@ -218,7 +215,7 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 			$methodParamAnnotation = implode('%', $actionMethodTags['param']) . '%';
 
 			foreach ($requestArgumentNames as $requestArgumentName) {
-				if(
+				if (
 					!in_array($requestArgumentName, self::$reservedArgumentNames)
 					&& stripos($methodParamAnnotation, '$' . $requestArgumentName . '%') !== FALSE
 				) {
@@ -232,4 +229,4 @@ class Tx_ExtbaseRest_Mvc_Web_RequestBuilder extends Tx_Extbase_MVC_Web_RequestBu
 		return $canActionSatisfyRequest;
 	}
 
-} 
+}

@@ -1,4 +1,6 @@
 <?php
+namespace ArnoSchoon\ExtbaseRest\Core;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -23,6 +25,11 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-class Tx_ExtbaseRest_Core_Bootstrap extends Tx_Extbase_Core_Bootstrap {
+/**
+ * Class Bootstrap
+ *
+ * @package ArnoSchoon\ExtbaseRest\Core
+ */
+class Bootstrap extends \TYPO3\CMS\Extbase\Core\Bootstrap {
 
 } 

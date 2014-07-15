@@ -1,4 +1,6 @@
 <?php
+namespace ArnoSchoon\ExtbaseRest\Controller;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -23,7 +25,14 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-class Tx_ExtbaseRest_Controller_DummyController extends Tx_Extbase_MVC_Controller_ActionController {
+use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
+
+/**
+ * Class DummyController
+ *
+ * @package ArnoSchoon\ExtbaseRest\Controller
+ */
+class DummyController extends ActionController {
 
 	/**
 	 * @return string

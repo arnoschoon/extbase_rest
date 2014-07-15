@@ -1,28 +1,22 @@
 <?php
-if (!defined('EXTBASE_REST_V6') && stripos(TYPO3_version, '6.') === 0) {
-    define('EXTBASE_REST_V6', TRUE);
-} elseif(!defined('EXTBASE_REST_V6')) {
-    define('EXTBASE_REST_V6', FALSE);
-}
-
 $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/index_ts.php']['preprocessRequest'][] =
-	'Tx_ExtbaseRest_Hook_FrontendRequestPreProcessor->mapRestRequestToEid';
+	'ArnoSchoon\\ExtbaseRest\\Hook\\FrontendRequestPreProcessor->mapRestRequestToEid';
 
 $GLOBALS['TYPO3_CONF_VARS']['FE']['eID_include']['Tx_ExtbaseRest_Router'] =
-	t3lib_extMgm::extPath('extbase_rest', 'Resources/Private/PHP/Router.php');
+	\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('extbase_rest', 'Resources/Private/PHP/Router.php');
 
-t3lib_extMgm::addTypoScript('extbase_rest', 'setup', '
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTypoScript('extbase_rest', 'setup', '
 config.tx_extbase {
 	mvc {
 		requestHandlers {
-			Tx_ExtbaseRest_Mvc_Web_RestRequestHandler = Tx_ExtbaseRest_Mvc_Web_RestRequestHandler
+			ArnoSchoon\ExtbaseRest\Mvc\Web\RestRequestHandler = ArnoSchoon\ExtbaseRest\Mvc\Web\RestRequestHandler
 		}
 	}
 }
 ', 43);
 
-Tx_Extbase_Utility_Extension::configurePlugin(
-	'ExtbaseRest',
+\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+	'ArnoSchoon.ExtbaseRest',
 	'Example',
 	array(
 		'Dummy' => 'index,show'

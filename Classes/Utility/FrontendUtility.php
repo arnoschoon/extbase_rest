@@ -1,4 +1,6 @@
 <?php
+namespace ArnoSchoon\ExtbaseRest\Utility;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -23,42 +25,60 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-class Tx_ExtbaseRest_Utility_FrontendUtility {
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Frontend\Utility\EidUtility;
+
+/**
+ * Class FrontendUtility
+ *
+ * @package ArnoSchoon\ExtbaseRest\Utility
+ */
+class FrontendUtility {
 
 	/**
-	 * @var tslib_fe
+	 * @var \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
 	 */
-	protected static $tsfeBackup;
+	protected static $typoScriptFrontendBackup;
 
 	/**
 	 * @return void
 	 */
 	public static function startSimulation() {
-		self::$tsfeBackup = $GLOBALS['TSFE'];
+		self::$typoScriptFrontendBackup = $GLOBALS['TSFE'];
 
 		$pageId = (int) $_SERVER['HTTP_X_TYPO3_ID'];
 		$languageId = (int) $_SERVER['HTTP_X_TYPO3_L'];
 
 		if ($languageId > 0) {
-			t3lib_div::_GETset($languageId, 'L');
+			GeneralUtility::_GETset($languageId, 'L');
 		}
 
-		$GLOBALS['TSFE'] = t3lib_div::makeInstance('tslib_fe', $GLOBALS['TYPO3_CONF_VARS'], $pageId, 0);
-		$GLOBALS['TSFE']->initFEuser();
-		$GLOBALS['TSFE']->determineId();
-		$GLOBALS['TSFE']->includeTCA();
-		$GLOBALS['TSFE']->initTemplate();
-		$GLOBALS['TSFE']->getConfigArray();
-		$GLOBALS['TSFE']->convPOSTCharset();
-		$GLOBALS['TSFE']->settingLanguage();
-		$GLOBALS['TSFE']->settingLocale();
+		/** @var \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController $typoScriptFrontend */
+		$typoScriptFrontend = GeneralUtility::makeInstance(
+			'TYPO3\\CMS\\Frontend\\Controller\\TypoScriptFrontendController',
+			$GLOBALS['TYPO3_CONF_VARS'],
+			$pageId,
+			0
+		);
+
+		EidUtility::initTCA();
+
+		$typoScriptFrontend->initFEuser();
+		$typoScriptFrontend->determineId();
+		$typoScriptFrontend->initTemplate();
+		$typoScriptFrontend->getConfigArray();
+		$typoScriptFrontend->convPOSTCharset();
+		$typoScriptFrontend->settingLanguage();
+		$typoScriptFrontend->settingLocale();
+
+		$GLOBALS['TSFE'] = $typoScriptFrontend;
 	}
 
 	/**
 	 * @return void
 	 */
 	public static function stopSimulation() {
-		$GLOBALS['TSFE'] = self::$tsfeBackup;
+		$GLOBALS['TSFE'] = self::$typoScriptFrontendBackup;
 	}
 
 } 

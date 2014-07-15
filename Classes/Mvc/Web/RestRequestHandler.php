@@ -1,4 +1,6 @@
 <?php
+namespace ArnoSchoon\ExtbaseRest\Mvc\Web;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -23,39 +25,52 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-class Tx_ExtbaseRest_Mvc_Web_RestRequestHandler extends Tx_Extbase_MVC_Web_FrontendRequestHandler {
+use ArnoSchoon\ExtbaseRest\Router;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Mvc\Web\FrontendRequestHandler;
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+
+
+/**
+ * Class RestRequestHandler
+ *
+ * @package ArnoSchoon\ExtbaseRest\Mvc\Web
+ */
+class RestRequestHandler extends FrontendRequestHandler {
 
 	/**
-	 * @param Tx_ExtbaseRest_Mvc_Web_RequestBuilder $requestBuilder
-	 * @return void
+	 * @var \ArnoSchoon\ExtbaseRest\Mvc\Web\RequestBuilder
+	 * @inject
 	 */
-	public function injectRequestBuilder(Tx_ExtbaseRest_Mvc_Web_RequestBuilder $requestBuilder) {
-		$this->requestBuilder = $requestBuilder;
-	}
+	protected $requestBuilder;
 
 	/**
 	 * Handles the web request. The response will automatically be sent to the client.
 	 *
-	 * @return Tx_Extbase_MVC_Web_Response
+	 * @return \TYPO3\CMS\Extbase\Mvc\Web\Response
 	 */
 	public function handleRequest() {
 		$request = $this->requestBuilder->build();
 
 		// TODO: implement request verification (fake hmac)
 
-		/** @var $requestHashService \TYPO3\CMS\Extbase\Security\Channel\RequestHashService */
-		//$requestHashService = $this->objectManager->get('TYPO3\\CMS\\Extbase\\Security\\Channel\\RequestHashService');
-		//$requestHashService->verifyRequest($request);
-
 		$request->setHmacVerified(TRUE);
 
-		if ($this->extensionService->isActionCacheable(NULL, NULL, $request->getControllerName(), $request->getControllerActionName())) {
+		$isActionCacheable = $this->extensionService->isActionCacheable(
+			NULL,
+			NULL,
+			$request->getControllerName(),
+			$request->getControllerActionName()
+		);
+
+		if ($isActionCacheable) {
 			$request->setIsCached(TRUE);
 		} else {
 			$contentObject = $this->configurationManager->getContentObject();
-			if ($contentObject->getUserObjectType() === \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::OBJECTTYPE_USER) {
+			if ($contentObject->getUserObjectType() === ContentObjectRenderer::OBJECTTYPE_USER) {
 				$contentObject->convertToUserIntObject();
-				// \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::convertToUserIntObject() will recreate the object, so we have to stop the request here
+				// ContentObjectRenderer::convertToUserIntObject() will recreate the object,
+				// so we have to stop the request here
 				return NULL;
 			}
 			$request->setIsCached(FALSE);
@@ -65,7 +80,7 @@ class Tx_ExtbaseRest_Mvc_Web_RestRequestHandler extends Tx_Extbase_MVC_Web_Front
 		$response = $this->objectManager->get('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Response');
 		$this->dispatcher->dispatch($request, $response);
 
-		if(stripos($request->getFormat(), 'json') !== FALSE) {
+		if (stripos($request->getFormat(), 'json') !== FALSE) {
 			$response->setHeader('Content-type', 'application/json; charset=UTF-8');
 		}
 
@@ -78,12 +93,12 @@ class Tx_ExtbaseRest_Mvc_Web_RestRequestHandler extends Tx_Extbase_MVC_Web_Front
 	 * @return boolean If the request is a web request, TRUE otherwise FALSE
 	 */
 	public function canHandleRequest() {
-		$requestUri = t3lib_div::getIndpEnv('REQUEST_URI');
+		$requestUri = GeneralUtility::getIndpEnv('REQUEST_URI');
 
 		return (
 			TYPO3_MODE === 'FE'
 			&& stripos($requestUri, '/_rest/') !== FALSE
-			&& preg_match(Tx_ExtbaseRest_Router::PLUGIN_NAMESPACE_PATTERN, $requestUri) === 1
+			&& preg_match(Router::PLUGIN_NAMESPACE_PATTERN, $requestUri) === 1
 		);
 	}
 

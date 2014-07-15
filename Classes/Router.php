@@ -1,4 +1,6 @@
 <?php
+namespace ArnoSchoon\ExtbaseRest;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -23,7 +25,16 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-class Tx_ExtbaseRest_Router {
+use ArnoSchoon\ExtbaseRest\Utility\FrontendUtility;
+use ArnoSchoon\ExtbaseRest\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\HttpUtility;
+
+/**
+ * Class Router
+ *
+ * @package ArnoSchoon\ExtbaseRest
+ */
+class Router {
 
 	/**
 	 * @var string
@@ -36,7 +47,8 @@ class Tx_ExtbaseRest_Router {
 	const CONTROLLER_FORMAT_PATTERN = '/\/_rest\/[^\/]+\/([^\.]+)\.([a-z0-9]+)/i';
 
 	/**
-	 * @var Tx_Extbase_Object_ObjectManager
+	 * @var \TYPO3\CMS\Extbase\Object\ObjectManager
+	 * @inject
 	 */
 	protected $objectManager;
 
@@ -51,31 +63,28 @@ class Tx_ExtbaseRest_Router {
 		$match = NULL;
 
 		if (preg_match(self::PLUGIN_NAMESPACE_PATTERN, $requestUri, $match) === 1) {
-			Tx_ExtbaseRest_Utility_FrontendUtility::startSimulation();
+			FrontendUtility::startSimulation();
 
-			/** @var Tx_Extbase_Object_ObjectManager objectManager */
-			$this->objectManager = t3lib_div::makeInstance('Tx_Extbase_Object_ObjectManager');
-
-			/** @var Tx_ExtbaseRest_Core_Bootstrap $bootstrap */
-			$bootstrap = $this->objectManager->create('Tx_ExtbaseRest_Core_Bootstrap');
+			/** @var \ArnoSchoon\ExtbaseRest\Core\Bootstrap $bootstrap */
+			$bootstrap = $this->objectManager->get('ArnoSchoon\\ExtbaseRest\\Core\\Bootstrap');
 
 			$namespaceParts = explode('.', $match[1]);
 
-			if(count($namespaceParts) == 3) {
-				$configuration['vendorName'] = Tx_ExtbaseRest_Utility_GeneralUtility::conditionalUpperCamelCase($namespaceParts[0]);
-				$configuration['extensionName'] = Tx_ExtbaseRest_Utility_GeneralUtility::conditionalUpperCamelCase($namespaceParts[1]);
-				$configuration['pluginName'] = Tx_ExtbaseRest_Utility_GeneralUtility::conditionalUpperCamelCase($namespaceParts[2]);
+			if (count($namespaceParts) == 3) {
+				$configuration['vendorName'] = GeneralUtility::conditionalUpperCamelCase($namespaceParts[0]);
+				$configuration['extensionName'] = GeneralUtility::conditionalUpperCamelCase($namespaceParts[1]);
+				$configuration['pluginName'] = GeneralUtility::conditionalUpperCamelCase($namespaceParts[2]);
 			} else {
-				$configuration['extensionName'] = Tx_ExtbaseRest_Utility_GeneralUtility::conditionalUpperCamelCase($namespaceParts[0]);
-				$configuration['pluginName'] = Tx_ExtbaseRest_Utility_GeneralUtility::conditionalUpperCamelCase($namespaceParts[1]);
+				$configuration['extensionName'] = GeneralUtility::conditionalUpperCamelCase($namespaceParts[0]);
+				$configuration['pluginName'] = GeneralUtility::conditionalUpperCamelCase($namespaceParts[1]);
 			}
 
 			$response = $bootstrap->run('', $configuration);
 
 
-			Tx_ExtbaseRest_Utility_FrontendUtility::stopSimulation();
+			FrontendUtility::stopSimulation();
 		} else {
-			header(t3lib_utility_Http::HTTP_STATUS_400);
+			header(HttpUtility::HTTP_STATUS_400);
 		}
 
 		return $response;

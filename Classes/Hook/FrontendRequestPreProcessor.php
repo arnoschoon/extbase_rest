@@ -1,4 +1,6 @@
 <?php
+namespace ArnoSchoon\ExtbaseRest\Hook;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -23,7 +25,14 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-class Tx_ExtbaseRest_Hook_FrontendRequestPreProcessor {
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
+/**
+ * Class FrontendRequestPreProcessor
+ *
+ * @package ArnoSchoon\ExtbaseRest\Hook
+ */
+class FrontendRequestPreProcessor {
 
 	/**
 	 * @param array $foo
@@ -32,11 +41,11 @@ class Tx_ExtbaseRest_Hook_FrontendRequestPreProcessor {
 	 * @return void
 	 */
 	public function mapRestRequestToEid(array $foo, array $bar) {
-		$requestUri = t3lib_div::getIndpEnv('REQUEST_URI');
+		$requestUri = GeneralUtility::getIndpEnv('REQUEST_URI');
+		$queryArguments = GeneralUtility::_GET();
 
-		if (!isset($_GET['eID']) && stripos($requestUri, '/_rest/') !== FALSE) {
-			t3lib_div::_GETset('Tx_ExtbaseRest_Router', 'eID');
+		if (is_array($queryArguments) && !array_key_exists('eID', $queryArguments) && stripos($requestUri, '/_rest/') !== FALSE) {
+			GeneralUtility::_GETset('Tx_ExtbaseRest_Router', 'eID');
 		}
 	}
-
-} 
+}
