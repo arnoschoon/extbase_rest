@@ -90,4 +90,5 @@ class Router {
 		return $response;
 	}
 
-} 
+}
+?>

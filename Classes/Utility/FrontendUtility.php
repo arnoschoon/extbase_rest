@@ -81,4 +81,5 @@ class FrontendUtility {
 		$GLOBALS['TSFE'] = self::$typoScriptFrontendBackup;
 	}
 
-} 
+}
+?>

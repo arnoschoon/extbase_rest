@@ -51,4 +51,5 @@ class GeneralUtility {
 		return $subject;
 	}
 
-} 
+}
+?>

@@ -22,3 +22,4 @@ config.tx_extbase {
 		'Dummy' => 'index,show'
 	)
 );
+?>

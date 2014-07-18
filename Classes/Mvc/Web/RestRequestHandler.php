@@ -112,4 +112,5 @@ class RestRequestHandler extends FrontendRequestHandler {
 		return 200;
 	}
 
-} 
+}
+?>

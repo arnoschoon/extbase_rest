@@ -32,4 +32,5 @@ namespace ArnoSchoon\ExtbaseRest\Core;
  */
 class Bootstrap extends \TYPO3\CMS\Extbase\Core\Bootstrap {
 
-} 
+}
+?>

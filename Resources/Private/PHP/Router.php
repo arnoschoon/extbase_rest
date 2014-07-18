@@ -12,3 +12,4 @@ if (stripos($requestUri, '/_rest/') !== FALSE) {
 } else {
 	header(\TYPO3\CMS\Core\Utility\HttpUtility::HTTP_STATUS_400);
 }
+?>
