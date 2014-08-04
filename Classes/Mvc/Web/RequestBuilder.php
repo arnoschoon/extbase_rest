@@ -147,6 +147,10 @@ class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 				$request->getControllerObjectName(),
 				$actionName . 'Action'
 			);
+			$methodParameters = $this->reflectionService->getMethodParameters(
+				$request->getControllerObjectName(),
+				$actionName . 'Action'
+			);
 
 			if (
 				is_array($actionMethodTags)
@@ -154,7 +158,7 @@ class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 				&& is_array($actionMethodTags['restMethod'])
 				&& in_array($requestMethod, $actionMethodTags['restMethod'])
 			) {
-				$possibleActionNames[$actionName] = $actionMethodTags;
+				$possibleActionNames[$actionName] = $methodParameters;
 			}
 		}
 
@@ -188,7 +192,7 @@ class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 			});
 
 			foreach ($possibleActionNames as $possibleActionName => $possibleActionMethodTags) {
-				if (!$this->canActionSatisfyRequest($possibleActionMethodTags, $request)) {
+				if (!$this->canActionSatisfyRequest($possibleActionMethodTags, $request, $possibleActionName)) {
 					unset($possibleActionNames[$possibleActionName]);
 				}
 			}
@@ -198,32 +202,19 @@ class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 	}
 
 	/**
-	 * @var array $actionMethodTags
+	 * @var array $actionMethodParameters
 	 * @param \TYPO3\CMS\Extbase\MVC\Web\Request $request
 	 *
 	 * @return bool
 	 */
-	protected function canActionSatisfyRequest(array $actionMethodTags, \TYPO3\CMS\Extbase\MVC\Web\Request $request) {
+	protected function canActionSatisfyRequest(array $actionMethodParameters, \TYPO3\CMS\Extbase\MVC\Web\Request $request) {
 		$requestArgumentNames = array_keys($request->getArguments());
 		$canActionSatisfyRequest = TRUE;
 
-		if (
-			array_key_exists('param', $actionMethodTags)
-			&& is_array($actionMethodTags['param'])
-		) {
-			$availableParams = 0;
-			$methodParamAnnotation = implode('%', $actionMethodTags['param']) . '%';
-
-			foreach ($requestArgumentNames as $requestArgumentName) {
-				if (
-					!in_array($requestArgumentName, self::$reservedArgumentNames)
-					&& stripos($methodParamAnnotation, '$' . $requestArgumentName . '%') !== FALSE
-				) {
-					$availableParams++;
-				}
+		foreach ($actionMethodParameters as $parameterName => $parameterConfiguration) {
+			if ($parameterConfiguration['optional'] === FALSE && !in_array($parameterName, $requestArgumentNames)) {
+				$canActionSatisfyRequest = FALSE;
 			}
-
-			$canActionSatisfyRequest = ($availableParams > 0 && $availableParams == count($actionMethodTags['param']));
 		}
 
 		return $canActionSatisfyRequest;
