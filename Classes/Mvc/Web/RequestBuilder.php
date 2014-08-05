@@ -109,12 +109,36 @@ class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 	 * @return array
 	 */
 	protected function buildParametersFromRequest() {
+		$pluginNamespace = $this->extensionService->getPluginNamespace($this->extensionName, $this->pluginName);
 		$rawRequestBody = file_get_contents('php://input');
 		$requestUri = GeneralUtility::getIndpEnv('REQUEST_URI');
+		$parameters = array();
 		$match = NULL;
 
-		$pluginNamespace = $this->extensionService->getPluginNamespace($this->extensionName, $this->pluginName);
-		$parameters = GeneralUtility::_GPmerged($pluginNamespace);
+		$namespaceGetParameters = GeneralUtility::_GET($pluginNamespace);
+		$namespacePostParameters = GeneralUtility::_POST($pluginNamespace);
+		$getParameters = GeneralUtility::_GET();
+		$postParameters = GeneralUtility::_POST();
+
+		if ($getParameters !== NULL && is_array($getParameters)) {
+			ArrayUtility::mergeRecursiveWithOverrule($parameters, $getParameters);
+		}
+
+		if ($postParameters !== NULL && is_array($postParameters)) {
+			ArrayUtility::mergeRecursiveWithOverrule($parameters, $postParameters);
+		}
+
+		if ($namespaceGetParameters !== NULL && is_array($namespaceGetParameters)) {
+			ArrayUtility::mergeRecursiveWithOverrule($parameters, $namespaceGetParameters);
+		}
+
+		if ($namespacePostParameters !== NULL && is_array($namespacePostParameters)) {
+			ArrayUtility::mergeRecursiveWithOverrule($parameters, $namespacePostParameters);
+		}
+
+		if (array_key_exists($pluginNamespace, $parameters)) {
+			unset($parameters[$pluginNamespace]);
+		}
 
 		if (preg_match(Router::CONTROLLER_FORMAT_PATTERN, $requestUri, $match) === 1) {
 			$parameters['controller'] = \ArnoSchoon\ExtbaseRest\Utility\GeneralUtility::conditionalUpperCamelCase($match[1]);
