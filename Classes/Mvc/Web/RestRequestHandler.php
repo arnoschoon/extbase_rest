@@ -39,6 +39,13 @@ use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 class RestRequestHandler extends FrontendRequestHandler {
 
 	/**
+	 * Keep track of the number of request we're handling
+	 *
+	 * @var int
+	 */
+	protected static $pendingRequestCount = 0;
+
+	/**
 	 * @var \ArnoSchoon\ExtbaseRest\Mvc\Web\RequestBuilder
 	 * @inject
 	 */
@@ -50,6 +57,7 @@ class RestRequestHandler extends FrontendRequestHandler {
 	 * @return \TYPO3\CMS\Extbase\Mvc\Web\Response
 	 */
 	public function handleRequest() {
+		self::$pendingRequestCount++;
 		$request = $this->requestBuilder->build();
 
 		// TODO: implement request verification (fake hmac)
@@ -95,8 +103,13 @@ class RestRequestHandler extends FrontendRequestHandler {
 	public function canHandleRequest() {
 		$requestUri = GeneralUtility::getIndpEnv('REQUEST_URI');
 
+			// if an internal request is done by extbase
+			// all request handlers are evaluated again
+			// since the request URL is not reliable enough
+			// check if we're not already handling a /_rest/ request
 		return (
-			TYPO3_MODE === 'FE'
+			self::$pendingRequestCount === 0
+			&& TYPO3_MODE === 'FE'
 			&& stripos($requestUri, '/_rest/') !== FALSE
 			&& preg_match(Router::PLUGIN_NAMESPACE_PATTERN, $requestUri) === 1
 		);
