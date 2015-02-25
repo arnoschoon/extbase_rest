@@ -25,6 +25,7 @@ namespace ArnoSchoon\ExtbaseRest\Utility;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use TYPO3\CMS\Core\TypoScript\TemplateService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Utility\EidUtility;
 
@@ -70,6 +71,15 @@ class FrontendUtility {
 		$typoScriptFrontend->convPOSTCharset();
 		$typoScriptFrontend->settingLanguage();
 		$typoScriptFrontend->settingLocale();
+
+			// force absRefPrefix, any URL generated further on should respect this setting
+		if ($typoScriptFrontend->tmpl instanceof TemplateService && is_array($typoScriptFrontend->tmpl->setup)
+			&& array_key_exists('config.', $typoScriptFrontend->tmpl->setup)
+			&& is_array($typoScriptFrontend->tmpl->setup['config.'])
+			&& array_key_exists('absRefPrefix', $typoScriptFrontend->tmpl->setup['config.'])
+			) {
+			$typoScriptFrontend->absRefPrefix = $typoScriptFrontend->tmpl->setup['config.']['absRefPrefix'];
+		}
 
 		$GLOBALS['TSFE'] = $typoScriptFrontend;
 	}
