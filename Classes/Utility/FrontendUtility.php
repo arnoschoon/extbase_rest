@@ -62,6 +62,12 @@ class FrontendUtility {
 			0
 		);
 
+			// export the fresh instance of TypoScriptFrontendController to globals
+			// code we are about to execute relies on $GLOBALS[TSFE] being set
+			// if $GLOBALS[TSFE] is NULL PHP emits the following warning
+			// Creating default object from empty value
+		$GLOBALS['TSFE'] = $typoScriptFrontend;
+
 		EidUtility::initTCA();
 
 		$typoScriptFrontend->initFEuser();
@@ -80,8 +86,6 @@ class FrontendUtility {
 			) {
 			$typoScriptFrontend->absRefPrefix = $typoScriptFrontend->tmpl->setup['config.']['absRefPrefix'];
 		}
-
-		$GLOBALS['TSFE'] = $typoScriptFrontend;
 	}
 
 	/**
