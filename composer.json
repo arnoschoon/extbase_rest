@@ -1,7 +1,7 @@
 {
 	"name": "arnoschoon/extbase_rest",
-	"type": "typo3cms-extension",
+	"type": "typo3-cms-extension",
 	"require": {
-		"lw/typo3cms-installers": "*"
+		"typo3/cms-composer-installers": "*"
 	}
 }
