@@ -57,8 +57,8 @@ class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 		$this->loadDefaultValues();
 		$parameters = $this->buildParametersFromRequest();
 
-		/** @var \TYPO3\CMS\Extbase\MVC\Web\Request $request */
-		$request = $this->objectManager->get('TYPO3\\CMS\\Extbase\\MVC\\Web\\Request');
+		/** @var \TYPO3\CMS\Extbase\Mvc\Web\Request $request */
+		$request = $this->objectManager->get('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Request');
 		$request->setPluginName($this->pluginName);
 		$request->setControllerExtensionName($this->extensionName);
 
@@ -157,11 +157,11 @@ class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 	}
 
 	/**
-	 * @param \TYPO3\CMS\Extbase\MVC\Web\Request $request
+	 * @param \TYPO3\CMS\Extbase\Mvc\Web\Request $request
 	 *
 	 * @return string|null
 	 */
-	protected function resolveActionNameByRequestMethod(\TYPO3\CMS\Extbase\MVC\Web\Request $request) {
+	protected function resolveActionNameByRequestMethod(\TYPO3\CMS\Extbase\Mvc\Web\Request $request) {
 		$allowedActions = $this->allowedControllerActions[$request->getControllerName()];
 		$requestMethod = $request->getMethod();
 		$possibleActionNames = array();
@@ -227,11 +227,11 @@ class RequestBuilder extends \TYPO3\CMS\Extbase\Mvc\Web\RequestBuilder {
 
 	/**
 	 * @var array $actionMethodParameters
-	 * @param \TYPO3\CMS\Extbase\MVC\Web\Request $request
+	 * @param \TYPO3\CMS\Extbase\Mvc\Web\Request $request
 	 *
 	 * @return bool
 	 */
-	protected function canActionSatisfyRequest(array $actionMethodParameters, \TYPO3\CMS\Extbase\MVC\Web\Request $request) {
+	protected function canActionSatisfyRequest(array $actionMethodParameters, \TYPO3\CMS\Extbase\Mvc\Web\Request $request) {
 		$requestArgumentNames = array_keys($request->getArguments());
 		$canActionSatisfyRequest = TRUE;
 
