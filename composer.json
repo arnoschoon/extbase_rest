@@ -1,5 +1,10 @@
 {
 	"name": "arnoschoon/extbase_rest",
+	"autoload": {
+		"psr-4": {
+			"ArnoSchoon\\ExtbaseRest\\": "Classes/"
+		}
+	},
 	"type": "typo3-cms-extension",
 	"require": {
 		"typo3/cms-composer-installers": "*"
