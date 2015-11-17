@@ -62,7 +62,7 @@ class RestRequestHandler extends FrontendRequestHandler {
 
 		// TODO: implement request verification (fake hmac)
 
-		$request->setHmacVerified(TRUE);
+		//$request->setHmacVerified(TRUE);
 
 		$isActionCacheable = $this->extensionService->isActionCacheable(
 			NULL,
