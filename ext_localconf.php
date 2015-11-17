@@ -1,7 +1,4 @@
 <?php
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['tslib/index_ts.php']['preprocessRequest'][] =
-	'ArnoSchoon\\ExtbaseRest\\Hook\\FrontendRequestPreProcessor->mapRestRequestToEid';
-
 $GLOBALS['TYPO3_CONF_VARS']['FE']['eID_include']['Tx_ExtbaseRest_Router'] =
 	\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('extbase_rest', 'Resources/Private/PHP/Router.php');
 
